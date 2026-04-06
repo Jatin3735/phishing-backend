@@ -1,0 +1,199 @@
+### PhishShield AI - Comprehensive API Testing File
+### Use the "REST Client" extension in VS Code to click and run these directly.
+### Be sure to run "Register" or "Login" first, then copy the generated `token` 
+### into the `@token = ` variable below so authorized routes will work!
+
+@baseUrl = http://localhost:5000/api
+@token = YOUR_JWT_TOKEN_HERE
+@reportId = REPLACE_WITH_REPORT_ID_AFTER_SCAN
+@simulationId = REPLACE_WITH_SIMULATION_ID_AFTER_START
+
+=======================================================
+================ 1. HEALTH AND UTILS ==================
+=======================================================
+
+### Check if server is running
+GET {{baseUrl}}/health
+
+=======================================================
+================ 2. AUTHENTICATION ====================
+=======================================================
+
+### Register a New User
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "name": "Jane Admin",
+    "email": "jane88@phishshield.com",
+    "password": "securepassword123"
+}
+
+###
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "jane88@phishshield.com",
+    "password": "securepassword123"
+}
+
+###
+### Get Current User Profile (Requires @token)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+###
+### Generate a new Developer API Key
+POST {{baseUrl}}/auth/api-key
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "Production Bot Key"
+}
+
+
+=======================================================
+=================== 3. SCANNERS =======================
+=======================================================
+
+### Scan a Malicious URL
+POST {{baseUrl}}/scan/url
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "url": "http://192.168.1.5/login.paypal.verify/banking-secure"
+}
+
+###
+### Scan a Safe URL
+POST {{baseUrl}}/scan/url
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "url": "https://www.google.com/search?q=puppies"
+}
+
+###
+### Scan a Phishing Message
+POST {{baseUrl}}/scan/message
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "text": "URGENT ACTION REQUIRED: Dear customer, your bank account has been compromised! Log in immediately here: http://secure-update-acct.com to secure your funds before they are frozen forever! Do this now!"
+}
+
+###
+### Scan a Screenshot (Image Upload)
+### Note: Ensure you have an image named proxy.png in the same directory, or change the path below `< ./proxy.png`
+POST {{baseUrl}}/scan/screenshot
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="proxy.png"
+Content-Type: image/png
+
+< ./proxy.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+
+=======================================================
+=============== 4. REPORTS & HISTORY ==================
+=======================================================
+
+### Get All Scan Reports (Paginated)
+GET {{baseUrl}}/reports?page=1&limit=10
+Authorization: Bearer {{token}}
+
+###
+### Get Specific Report by ID (Requires replacing @reportId above)
+GET {{baseUrl}}/reports/{{reportId}}
+Authorization: Bearer {{token}}
+
+###
+### Export Reports to JSON
+GET {{baseUrl}}/reports/export
+Authorization: Bearer {{token}}
+
+
+=======================================================
+==================== 5. DASHBOARD =====================
+=======================================================
+
+### Get Dashboard Key Stats
+GET {{baseUrl}}/dashboard/stats
+Authorization: Bearer {{token}}
+
+###
+### Get Dashboard Activity Feed
+GET {{baseUrl}}/dashboard/feed?limit=5
+Authorization: Bearer {{token}}
+
+###
+### Get Dashboard Analytics Charts Data
+GET {{baseUrl}}/dashboard/charts
+Authorization: Bearer {{token}}
+
+
+=======================================================
+================= 6. SIMULATIONS ======================
+=======================================================
+
+### Get Available Phishing Templates
+GET {{baseUrl}}/simulation/templates
+Authorization: Bearer {{token}}
+
+###
+### Start a New Simulation Session
+POST {{baseUrl}}/simulation/start
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "templateId": "tpl_1"
+}
+
+###
+### Track User Action (Failed: Clicked Link)
+### Replace {{@simulationId}} at top using ID from the /start endpoint above
+POST {{baseUrl}}/simulation/action
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "simId": "{{simulationId}}",
+    "actionType": "click_link"
+}
+
+###
+### Track Another User Action (Failed: Entered Credentials)
+POST {{baseUrl}}/simulation/action
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "simId": "{{simulationId}}",
+    "actionType": "enter_creds"
+}
+
+###
+### Track User Action (Success: Reported Phishing)
+POST {{baseUrl}}/simulation/action
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "simId": "{{simulationId}}",
+    "actionType": "report"
+}
+
+###
+### Get Final Simulation Report/Score
+GET {{baseUrl}}/simulation/{{simulationId}}/result
+Authorization: Bearer {{token}}

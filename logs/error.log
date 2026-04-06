@@ -1,0 +1,2 @@
+{"level":"error","message":"Error connecting to MongoDB: connect ECONNREFUSED 127.0.0.1:27017","service":"phishshield-api","timestamp":"2026-04-06 14:38:58"}
+{"level":"error","message":"Error connecting to MongoDB: connect ECONNREFUSED 127.0.0.1:27017","service":"phishshield-api","timestamp":"2026-04-06 14:43:45"}
